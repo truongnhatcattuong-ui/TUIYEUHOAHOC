@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BẢNG TUẦN HOÀN HÓA HỌC - IUPAC 2019</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- HEADER CHÍNH -->
+    <header class="main-header">
+      <div class="header-top-row">
+        <div class="title-block">
+          <h1 class="main-title">BẢNG TUẦN HOÀN HÓA HỌC</h1>
+          <p class="source-subtitle">
+            nguồn :<a href="https://iupac.qmul.ac.uk/AtWt/AtWt19.html" target="_blank" rel="noopener noreferrer">IUPAC.ATOMIC WEIGHT OF THE ELEMENTS 2019.</a>
+          </p>
+        </div>
+
+        <!-- THANH TÌM KIẾM & CÔNG CỤ Ở TRÊN CÙNG -->
+        <div class="controls-row">
+          <div class="search-box">
+            <span class="search-icon">🔎</span>
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Tìm tên (Sắt, Iron), ký hiệu (Fe), số hiệu (26) hoặc nhóm..."
+              aria-label="Tìm kiếm nguyên tố hóa học"
+            />
+            <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Xóa tìm kiếm">✕</button>
+          </div>
+          <button type="button" id="btnCompactToggle" class="action-btn" title="Thu gọn hoặc phóng chuẩn bảng trên màn hình nhỏ">
+            📱 Thu gọn bảng
+          </button>
+        </div>
+      </div>
+
+      <!-- THANH PHÂN LOẠI NHÓM NGUYÊN TỐ (NHẤP ĐỂ LÀM SÁNG NỔI BẬT) -->
+      <div class="category-bar-wrap">
+        <div id="categoryList" class="category-list" role="tablist" aria-label="Phân loại nhóm nguyên tố"></div>
+        <div id="filterStatusBox" class="filter-status" style="display: none;">
+          <span id="filterStatusText">Đang làm sáng: 118 nguyên tố</span>
+          <button type="button" id="btnResetFilter" class="filter-reset-inline" title="Bỏ lọc">✕</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- LƯỚI BẢNG TUẦN HOÀN CHUẨN 18 CỘT & 118 NGUYÊN TỐ -->
+    <main class="table-outer-wrapper">
+      <div id="periodicGrid" class="periodic-grid" aria-label="Lưới 18 cột Bảng tuần hoàn 118 nguyên tố hóa học"></div>
+    </main>
+  </div>
+
+  <!-- ================= POPUP CHI TIẾT NGUYÊN TỐ ================= -->
+  <div id="elementModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalFullName">
+    <div class="element-modal-card">
+      <div class="element-modal-header">
+        <div class="el-header-left">
+          <div id="modalBigBadge" class="el-big-badge">
+            <span id="modalBadgeZ" class="badge-z">1</span>
+            <span id="modalBadgeSym" class="badge-sym">H</span>
+          </div>
+          <div class="el-header-titles">
+            <div class="el-title-row">
+              <h2 id="modalFullName" class="el-full-name">Hiđro</h2>
+              <span id="modalEnName" class="el-en-name">(Hydrogen)</span>
+            </div>
+            <div class="el-sub-badges">
+              <span id="modalCatPill" class="meta-pill">Phi kim khác</span>
+              <span id="modalPeriodGroupPill" class="meta-pill">Chu kỳ 1 • Nhóm 1 (IA)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="el-header-actions">
+          <button type="button" id="btnPrevElement" class="icon-btn" title="Nguyên tố trước (Phím ←)">← Trước</button>
+          <button type="button" id="btnNextElement" class="icon-btn" title="Nguyên tố tiếp theo (Phím →)">Tiếp →</button>
+          <button type="button" id="btnCloseElementModal" class="icon-btn close-btn" title="Đóng cửa sổ (Esc)">✕</button>
+        </div>
+      </div>
+
+      <div class="element-modal-body">
+        <!-- CỘT TRÁI: CỬA SỔ MÔ HÌNH 3D CẤU HÌNH ELECTRON -->
+        <div id="atom3dWrapper" class="atom-3d-wrapper">
+          <div class="atom-3d-topbar">
+            <div id="atom3dElementLabel" class="atom-3d-title">⚛️ Mô hình 3D Cấu hình Electron</div>
+            <div class="atom-3d-controls">
+              <button type="button" id="btnZoomIn3D" class="ctrl-3d-btn" title="Phóng to mô hình 3D">＋</button>
+              <button type="button" id="btnZoomOut3D" class="ctrl-3d-btn" title="Thu nhỏ mô hình 3D">－</button>
+              <button type="button" id="btnReset3D" class="ctrl-3d-btn" title="Đặt lại góc nhìn 3D">⟲</button>
+              <button type="button" id="btnTogglePlay3D" class="ctrl-3d-btn" title="Tạm dừng hoặc tiếp tục chuyển động">⏸ Dừng quay</button>
+              <button type="button" id="btnMode3D" class="ctrl-3d-btn" title="Chuyển đổi góc nhìn 3D Đa trục và 3D Lớp vỏ Bohr">🌐 3D Đa trục</button>
+              <button type="button" id="btnExpand3D" class="ctrl-3d-btn expand-3d-btn" title="Mở rộng riêng cửa sổ mô hình 3D ra toàn màn hình web">⛶ Toàn màn hình 3D</button>
+            </div>
+          </div>
+
+          <div id="atomCanvasStage" class="atom-canvas-stage">
+            <canvas id="atom3dCanvas"></canvas>
+            <div class="atom-3d-overlay-hint">
+              <span>🖱️ Kéo để xoay 360° • Lăn chuột/Chụm 2 ngón để thu phóng</span>
+              <span class="atom-legend-items">
+                <span><i class="legend-dot" style="background:#38bdf8;"></i>Electron lớp trong</span>
+                <span><i class="legend-dot" style="background:#facc15;"></i>Electron lớp ngoài cùng</span>
+              </span>
+            </div>
+          </div>
+
+          <div id="atomShellsBar" class="atom-shells-bar"></div>
+        </div>
+
+        <!-- CỘT PHẢI: 8 THÔNG SỐ KHOA HỌC & MỤC NHỎ LỊCH SỬ TƯƠNG TÁC -->
+        <div class="element-info-column">
+          <div class="props-grid">
+            <div class="prop-card">
+              <span class="prop-label">Số hiệu nguyên tử (Z)</span>
+              <span id="propZ" class="prop-value">1</span>
+            </div>
+            <div class="prop-card">
+              <span class="prop-label">Ký hiệu hóa học</span>
+              <span id="propSym" class="prop-value">H</span>
+            </div>
+            <div class="prop-card">
+              <span class="prop-label">Tên đầy đủ (VN — Quốc tế)</span>
+              <span id="propName" class="prop-value">Hiđro — Hydrogen</span>
+            </div>
+            <div class="prop-card">
+              <span class="prop-label">Khối lượng nguyên tử (IUPAC 2019)</span>
+              <span id="propWeight" class="prop-value">1.008 u</span>
+            </div>
+            <div class="prop-card wide-prop">
+              <span class="prop-label">Cấu hình Electron & Phân lớp vỏ</span>
+              <span id="propConfig" class="prop-value">1s¹</span>
+              <span id="propShellsText" class="prop-sub">Phân bố lớp vỏ (1 lớp): 1</span>
+            </div>
+            <div class="prop-card">
+              <span class="prop-label">Hóa trị phổ biến</span>
+              <span id="propValence" class="prop-value">I</span>
+            </div>
+            <div class="prop-card">
+              <span class="prop-label">Độ âm điện (Pauling)</span>
+              <span id="propEN" class="prop-value">2.20</span>
+            </div>
+            <div class="prop-card wide-prop">
+              <span class="prop-label">Số oxi hóa</span>
+              <span id="propOx" class="prop-value">-1, +1</span>
+            </div>
+          </div>
+
+          <!-- MỤC NHỎ LỊCH SỬ NGUYÊN TỐ (BẤM ĐỂ MỞ CỬA SỔ LỊCH SỬ RIÊNG) -->
+          <div id="historyMiniCard" class="history-mini-card" role="button" tabindex="0" aria-label="Mở cửa sổ lịch sử khám phá nguyên tố">
+            <div class="history-mini-top">
+              <span class="history-mini-badge">📜 LỊCH SỬ KHÁM PHÁ & CÂU CHUYỆN NGUYÊN TỐ</span>
+              <button type="button" id="btnOpenHistoryModal" class="history-open-cta">Mở cửa sổ riêng ↗</button>
+            </div>
+            <div class="history-mini-meta">
+              <span id="miniHistDiscoverer">👤 Phát hiện: Henry Cavendish</span>
+              <span id="miniHistYear">📅 Năm: 1766</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CỬA SỔ RIÊNG LỊCH SỬ CỦA NGUYÊN TỐ ================= -->
+  <div id="historyModalBackdrop" class="history-window-backdrop" role="dialog" aria-modal="true" aria-labelledby="histWindowTitle">
+    <div class="history-window-card">
+      <div class="history-window-header">
+        <h3 id="histWindowTitle" class="history-window-title">📜 Lịch sử & Câu chuyện Nguyên tố</h3>
+        <button type="button" id="btnCloseHistoryModal" class="icon-btn close-btn" title="Đóng cửa sổ lịch sử">✕</button>
+      </div>
+
+      <div class="history-window-body">
+        <div class="history-facts-row">
+          <div class="history-fact-box">
+            <div class="history-fact-label">Người phát minh / Khám phá</div>
+            <div id="histDiscovererVal" class="history-fact-val">Henry Cavendish</div>
+          </div>
+          <div class="history-fact-box">
+            <div class="history-fact-label">Năm / Thời kỳ phát hiện</div>
+            <div id="histYearVal" class="history-fact-val">1766</div>
+          </div>
+          <div class="history-fact-box">
+            <div class="history-fact-label">Phân nhóm & Vị trí</div>
+            <div id="histCategoryVal" class="history-fact-val">Phi kim khác</div>
+          </div>
+          <div class="history-fact-box">
+            <div class="history-fact-label">Nguyên tử khối chuẩn IUPAC 2019</div>
+            <div id="histWeightVal" class="history-fact-val">1.008 u</div>
+          </div>
+        </div>
+
+        <div class="history-story-box">
+          <p id="histStoryText"></p>
+        </div>
+      </div>
+
+      <div class="history-window-footer">
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="btnHistPrevEl" class="icon-btn">← Nguyên tố trước</button>
+          <button type="button" id="btnHistNextEl" class="icon-btn">Nguyên tố sau →</button>
+        </div>
+        <button type="button" id="btnBackToElementModal" class="action-btn primary-outline">Quay lại bảng thông số</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
